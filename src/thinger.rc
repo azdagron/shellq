@@ -1,0 +1,9 @@
+#include <windows.h>
+#include "resource.h"
+
+
+STRINGTABLE
+BEGIN
+  IDS_QUEUE_MOVE_CMD       "Queue move here"
+  IDS_QUEUE_COPY_CMD       "Queue copy here"
+END
