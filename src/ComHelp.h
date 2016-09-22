@@ -1,6 +1,84 @@
 #pragma once
 
 template <typename T>
+class ComPtr {
+public:
+  ComPtr() : t_(nullptr) {}
+
+  ComPtr(T* t) : t_(nullptr) {
+    Attach(t);
+  }
+  ~ComPtr() {
+    Attach(nullptr);
+  }
+
+  T** operator&() {
+    return &t_;
+  }
+
+  operator T*() {
+    return t_;
+  }
+
+  ComPtr& operator=(T *t) {
+    Attach(t);
+    return *this;
+  }
+
+  T* operator->() {
+    return t_;
+  }
+
+  void Attach(T* t) {
+    if (t_) {
+      t_->Release();
+    }
+    t_ = t;
+  }
+private:
+ T* t_;
+};
+
+template <typename T>
+class CoTaskMem {
+public:
+  CoTaskMem() : t_(nullptr) {}
+
+  CoTaskMem(T* t) : t_(nullptr) {
+    Attach(t);
+  }
+  ~CoTaskMem() {
+    Attach(nullptr);
+  }
+
+  T** operator&() {
+    return &t_;
+  }
+
+  operator T*() {
+    return t_;
+  }
+
+  CoTaskMem& operator=(T *t) {
+    Attach(t);
+    return *this;
+  }
+
+  T* operator->() {
+    return t_;
+  }
+
+  void Attach(T* t) {
+    if (t_) {
+      CoTaskMemFree(t);
+    }
+    t_ = t;
+  }
+private:
+ T* t_;
+};
+
+template <typename T>
 class ClassFactory : public IClassFactory {
 public:
   ClassFactory() : ref_(0) {}
@@ -30,7 +108,7 @@ public:
 
   STDMETHODIMP QueryInterface(REFIID iid, void **ppv) {
     static const QITAB rgqit[] {   
-        QITABENT(ContextMenu, IClassFactory),
+        QITABENT(ClassFactory, IClassFactory),
         { 0 },
     };
     return QISearch(this, rgqit, iid, ppv);

@@ -1,13 +1,8 @@
 #pragma once
 
-#include <shlobj.h>
-
-[uuid("{49ce0c0b-3077-4a40-b88f-e61667819473}")]
 class ContextMenu : public IShellExtInit,
                     public IContextMenu {
 public:
-  ~ContextMenu();
-
   static HRESULT New(REFIID riid, void** ppv);
 
   STDMETHOD_(ULONG, AddRef)();
@@ -44,6 +39,7 @@ public:
 
 private:
   ContextMenu();
+  ~ContextMenu();
 
 private:
   ULONG ref_;

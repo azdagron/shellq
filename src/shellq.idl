@@ -1,0 +1,30 @@
+import "unknwn.idl"; 
+import "shobjidl.idl"; 
+
+[
+    object,
+    uuid(c2201419-8d7e-4894-b9e5-0b1da12aa5ff),
+]
+interface IFileOperationQueue : IUnknown
+{
+    HRESULT MoveItems([in] IUnknown* items, [in] IShellItem* dest);
+    HRESULT CopyItems([in] IUnknown* items, [in] IShellItem* dest);
+};
+
+[
+    uuid(8692c575-c561-4614-8661-79c360d0a84c),
+    helpstring("ShellQ Context Menu")
+]
+coclass ContextMenu
+{
+    [default] interface IContextMenu;
+};
+
+[
+    uuid(2d94ec68-d1c9-46cb-9d24-6fd80b76ee5b),
+    helpstring("ShellQ FileOperationQueue")
+]
+coclass FileOperationQueue
+{
+    [default] interface IFileOperationQueue;
+};

@@ -1,50 +1,56 @@
 #include "precomp.h"
 
-#include "ClassFactory.h"
 #include "ContextMenu.h"
+#include "FileOperationQueue.h"
+
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 namespace {
-  HINSTANCE g_instance;
-  ULONG g_ref;
+    HINSTANCE dllInstance;
+    ULONG globalRef;
 }
 
 HINSTANCE DllInstance() {
-  return g_instance;
+    return dllInstance;
 }
 
 void AddGlobalRef() {
-  InterlockedIncrement(&g_ref);
+    InterlockedIncrement(&globalRef);
 }
 
 void ReleaseGlobalRef() {
-  InterlockedDecrement(&g_ref);
+    InterlockedDecrement(&globalRef);
 }
 
 ULONG GetGlobalRef() {
-  return InterlockedCompareExchange(&g_ref, 0, 0);
+    return InterlockedCompareExchange(&globalRef, 0, 0);
 }
 
-BOOL WINAPI DllMain(
-  _In_  HINSTANCE hinstDLL,
-  _In_  DWORD fdwReason,
-  _In_  LPVOID lpvReserved
-)
-{
-  g_instance = hinstDLL;
-  return TRUE;
+BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved) {
+    if (reason == DLL_PROCESS_ATTACH) {
+        dllInstance = instance;
+        ::DisableThreadLibraryCalls(instance);
+    }
+    return TRUE;
 }
 
-STDAPI DllGetClassObject(
-  REFCLSID clsid,
-  REFIID   riid,
-  LPVOID   *ppv
-) {
-  if (clsid == __uuidof(ContextMenu)) {
-    return ClassFactory<ContextMenu>::New(riid, ppv);
-  }
-  return CLASS_E_CLASSNOTAVAILABLE;
+// Proxy implementations
+STDAPI ProxyDllGetClassObject(REFCLSID clsid, REFIID riid, LPVOID *ppv);
+STDAPI ProxyDllCanUnloadNow();
+
+STDAPI DllGetClassObject(REFCLSID clsid, REFIID riid, LPVOID *ppv) {
+    if (IsEqualCLSID(clsid, CLSID_ContextMenu)) {
+        return ClassFactory<ContextMenu>::New(riid, ppv);
+    }
+    if (IsEqualCLSID(clsid, CLSID_FileOperationQueue)) {
+        return ClassFactory<FileOperationQueue>::New(riid, ppv);
+    }
+    return ProxyDllGetClassObject(clsid, riid, ppv);
 }
 
 STDAPI DllCanUnloadNow() {
-  return GetGlobalRef() ? S_FALSE : S_OK;
+    if (GetGlobalRef()) {
+        return S_FALSE;
+    }
+    return ProxyDllCanUnloadNow();
 }
