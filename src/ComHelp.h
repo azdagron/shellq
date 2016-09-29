@@ -6,10 +6,19 @@ public:
   ComPtr() : t_(nullptr) {}
 
   ComPtr(T* t) : t_(nullptr) {
-    Attach(t);
+    Attach(t, true);
   }
   ~ComPtr() {
     Attach(nullptr);
+  }
+
+  HRESULT CreateInstance(REFCLSID clsid, DWORD context) {
+    T* t = nullptr;
+    HRESULT hr = ::CoCreateInstance(clsid, NULL, context, IID_PPV_ARGS(&t));
+    if (SUCCEEDED(hr)) {
+        Attach(t);
+    }
+    return hr;
   }
 
   T** operator&() {
@@ -20,8 +29,13 @@ public:
     return t_;
   }
 
+  ComPtr& operator=(const ComPtr<T>& other) {
+	  Attach(other.t_, true);
+	  return *this;
+  }
+
   ComPtr& operator=(T *t) {
-    Attach(t);
+    Attach(t, true);
     return *this;
   }
 
@@ -29,14 +43,18 @@ public:
     return t_;
   }
 
-  void Attach(T* t) {
-    if (t_) {
-      t_->Release();
-    }
-    t_ = t;
-  }
 private:
- T* t_;
+  void Attach(T* t, bool incref = false) {
+	if (t_) {
+		t_->Release();
+	}
+	t_ = t;
+	if (t_ && incref) {
+		t_->AddRef();
+	}
+  }
+
+  T* t_;
 };
 
 template <typename T>
@@ -110,7 +128,12 @@ public:
     static const QITAB rgqit[] {   
         QITABENT(ClassFactory, IClassFactory),
         { 0 },
-    };
+#pragma warning( push )
+#pragma warning( disable: 4365 )
+#pragma warning( disable: 4838 )
+    }
+#pragma warning( pop )
+	;
     return QISearch(this, rgqit, iid, ppv);
   }
 
@@ -123,7 +146,7 @@ public:
     return T::New(riid, ppv);
   }
   
-  HRESULT LockServer(BOOL lock) {
+  STDMETHODIMP LockServer(BOOL lock) {
     if (lock) {
       AddGlobalRef();
     } else {

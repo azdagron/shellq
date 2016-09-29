@@ -43,6 +43,6 @@ private:
 
 private:
   ULONG ref_;
-  ComPtr<IShellItem> folder_;
-  ComPtr<IDataObject> obj_;
+  ComPtr<IShellItem> dest_;
+  ComPtr<IDataObject> items_;
 };

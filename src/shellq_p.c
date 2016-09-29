@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Wed Sep 21 22:01:57 2016
+/* at Wed Sep 28 18:53:26 2016
  */
 /* Compiler settings for shellq.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 
@@ -86,8 +86,8 @@ extern const shellq_MIDL_EXPR_FORMAT_STRING shellq__MIDL_ExprFormatString;
 extern const MIDL_STUB_DESC Object_StubDesc;
 
 
-extern const MIDL_SERVER_INFO IFileOperationQueue_ServerInfo;
-extern const MIDL_STUBLESS_PROXY_INFO IFileOperationQueue_ProxyInfo;
+extern const MIDL_SERVER_INFO IOperationQueue_ServerInfo;
+extern const MIDL_STUBLESS_PROXY_INFO IOperationQueue_ProxyInfo;
 
 
 
@@ -229,52 +229,52 @@ static const shellq_MIDL_TYPE_FORMAT_STRING shellq__MIDL_TypeFormatString =
    GUID={0x00000000,0x0000,0x0000,{0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46}} */
 
 
-/* Object interface: IFileOperationQueue, ver. 0.0,
+/* Object interface: IOperationQueue, ver. 0.0,
    GUID={0xc2201419,0x8d7e,0x4894,{0xb9,0xe5,0x0b,0x1d,0xa1,0x2a,0xa5,0xff}} */
 
 #pragma code_seg(".orpc")
-static const unsigned short IFileOperationQueue_FormatStringOffsetTable[] =
+static const unsigned short IOperationQueue_FormatStringOffsetTable[] =
     {
     0,
     44
     };
 
-static const MIDL_STUBLESS_PROXY_INFO IFileOperationQueue_ProxyInfo =
+static const MIDL_STUBLESS_PROXY_INFO IOperationQueue_ProxyInfo =
     {
     &Object_StubDesc,
     shellq__MIDL_ProcFormatString.Format,
-    &IFileOperationQueue_FormatStringOffsetTable[-3],
+    &IOperationQueue_FormatStringOffsetTable[-3],
     0,
     0,
     0
     };
 
 
-static const MIDL_SERVER_INFO IFileOperationQueue_ServerInfo = 
+static const MIDL_SERVER_INFO IOperationQueue_ServerInfo = 
     {
     &Object_StubDesc,
     0,
     shellq__MIDL_ProcFormatString.Format,
-    &IFileOperationQueue_FormatStringOffsetTable[-3],
+    &IOperationQueue_FormatStringOffsetTable[-3],
     0,
     0,
     0,
     0};
-CINTERFACE_PROXY_VTABLE(5) _IFileOperationQueueProxyVtbl = 
+CINTERFACE_PROXY_VTABLE(5) _IOperationQueueProxyVtbl = 
 {
-    &IFileOperationQueue_ProxyInfo,
-    &IID_IFileOperationQueue,
+    &IOperationQueue_ProxyInfo,
+    &IID_IOperationQueue,
     IUnknown_QueryInterface_Proxy,
     IUnknown_AddRef_Proxy,
     IUnknown_Release_Proxy ,
-    (void *) (INT_PTR) -1 /* IFileOperationQueue::MoveItems */ ,
-    (void *) (INT_PTR) -1 /* IFileOperationQueue::CopyItems */
+    (void *) (INT_PTR) -1 /* IOperationQueue::MoveItems */ ,
+    (void *) (INT_PTR) -1 /* IOperationQueue::CopyItems */
 };
 
-const CInterfaceStubVtbl _IFileOperationQueueStubVtbl =
+const CInterfaceStubVtbl _IOperationQueueStubVtbl =
 {
-    &IID_IFileOperationQueue,
-    &IFileOperationQueue_ServerInfo,
+    &IID_IOperationQueue,
+    &IOperationQueue_ServerInfo,
     5,
     0, /* pure interpreted */
     CStdStubBuffer_METHODS
@@ -306,19 +306,19 @@ static const MIDL_STUB_DESC Object_StubDesc =
 
 const CInterfaceProxyVtbl * const _shellq_ProxyVtblList[] = 
 {
-    ( CInterfaceProxyVtbl *) &_IFileOperationQueueProxyVtbl,
+    ( CInterfaceProxyVtbl *) &_IOperationQueueProxyVtbl,
     0
 };
 
 const CInterfaceStubVtbl * const _shellq_StubVtblList[] = 
 {
-    ( CInterfaceStubVtbl *) &_IFileOperationQueueStubVtbl,
+    ( CInterfaceStubVtbl *) &_IOperationQueueStubVtbl,
     0
 };
 
 PCInterfaceName const _shellq_InterfaceNamesList[] = 
 {
-    "IFileOperationQueue",
+    "IOperationQueue",
     0
 };
 

@@ -2,7 +2,7 @@
 
 #include <shlobj.h>
 
-class FileOperationQueue : public IFileOperationQueue {
+class OperationQueue : public IOperationQueue {
 public:
   static HRESULT New(REFIID riid, void** ppv);
 
@@ -10,7 +10,7 @@ public:
   STDMETHOD_(ULONG, Release)();
   STDMETHOD(QueryInterface)(REFIID iid, void **ppv);
 
-  // IFileOperationQueue interface
+  // IOperationQueue interface
   STDMETHOD(MoveItems)(
     IUnknown* items,
     IShellItem* dest
@@ -22,8 +22,8 @@ public:
     );
 
 private:
-  FileOperationQueue();
-  ~FileOperationQueue();
+  OperationQueue();
+  ~OperationQueue();
 
 private:
   ULONG ref_;

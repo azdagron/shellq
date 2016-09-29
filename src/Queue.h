@@ -6,3 +6,4 @@ enum class OperationKind {
 };
 
 HRESULT AddOperation(OperationKind kind, IUnknown* items, IShellItem* dest);
+HRESULT RunOperation(OperationKind kind, IUnknown* items, IShellItem* dest);

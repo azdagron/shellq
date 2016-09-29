@@ -5,7 +5,7 @@ import "shobjidl.idl";
     object,
     uuid(c2201419-8d7e-4894-b9e5-0b1da12aa5ff),
 ]
-interface IFileOperationQueue : IUnknown
+interface IOperationQueue : IUnknown
 {
     HRESULT MoveItems([in] IUnknown* items, [in] IShellItem* dest);
     HRESULT CopyItems([in] IUnknown* items, [in] IShellItem* dest);
@@ -24,7 +24,7 @@ coclass ContextMenu
     uuid(2d94ec68-d1c9-46cb-9d24-6fd80b76ee5b),
     helpstring("ShellQ FileOperationQueue")
 ]
-coclass FileOperationQueue
+coclass OperationQueue
 {
-    [default] interface IFileOperationQueue;
+    [default] interface IOperationQueue;
 };

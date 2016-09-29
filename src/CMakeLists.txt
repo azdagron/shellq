@@ -3,6 +3,7 @@
 # midl shellq.idl
 
 add_definitions(-DENTRY_PREFIX=Proxy)
+add_definitions(-DPROXY_CLSID=CLSID_OurProxyFactory)
 
 add_library(shellq SHARED
     dllmain.cpp
@@ -12,7 +13,7 @@ add_library(shellq SHARED
     shellq_p.c
     dlldata.c
     ContextMenu.cpp
-    FileOperationQueue.cpp
+    OperationQueue.cpp
     Queue.cpp
     TrayIcon.cpp
     )

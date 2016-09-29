@@ -2,12 +2,69 @@
 
 #include "ContextMenu.h"
 
+#include <memory>
+
 namespace {
     enum Command : UINT {
         QueueMoveCmd = 1,
         QueueCopyCmd = 2,
         LastCmd
     };
+
+    struct InvokeCommandParams {
+        Command cmd;
+        ComPtr<IStream> items;
+        ComPtr<IStream> dest;
+    };
+
+    HRESULT InvokeCommand(InvokeCommandParams* params) {
+        // Unmarshal the stuff
+        ComPtr<IDataObject> items;
+        ComPtr<IShellItem> dest;
+
+        HRESULT hr = S_OK;
+        
+        hr = CoUnmarshalInterface(params->items, IID_PPV_ARGS(&items));
+        if (FAILED(hr)) {
+            Alart(hr, L"Cannot unmarshal items");
+            return hr;
+        }
+
+        hr = CoUnmarshalInterface(params->dest, IID_PPV_ARGS(&dest));
+        if (FAILED(hr)) {
+            Alart(hr, L"Cannot unmarshal dest");
+            return hr;
+        }
+
+        ComPtr<IOperationQueue> op;
+        hr = CoCreateInstance(CLSID_OperationQueue, NULL,
+                CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&op));
+        if (FAILED(hr)) {
+            Alart(hr, L"Cannot instantiate file operation queue");
+            return hr;
+        }
+
+        switch (params->cmd) {
+            case QueueMoveCmd:
+                hr = op->MoveItems(items, dest);
+                break;
+            case QueueCopyCmd:
+                hr = op->CopyItems(items, dest);
+                break;
+        }
+        if (FAILED(hr)) {
+            Alart(hr, L"InvokeCommand");
+            return hr;
+        }
+
+        return S_OK;
+    }
+
+    DWORD WINAPI ThreadProc(LPVOID lpParameter) {
+        std::unique_ptr<InvokeCommandParams> params(
+                static_cast<InvokeCommandParams*>(lpParameter));
+        return static_cast<DWORD>(InvokeCommand(params.get()));
+    }
 }
 
 ContextMenu::ContextMenu()
@@ -16,8 +73,8 @@ ContextMenu::ContextMenu()
 }
 
 ContextMenu::~ContextMenu() {
-    folder_ = nullptr;
-    obj_ = nullptr;
+    dest_ = nullptr;
+    items_ = nullptr;
     ReleaseGlobalRef();
 }
 
@@ -47,10 +104,15 @@ STDMETHODIMP_(ULONG) ContextMenu::Release() {
 STDMETHODIMP ContextMenu::QueryInterface(REFIID iid, void **ppv) {
     static const QITAB rgqit[] {   
         QITABENT(ContextMenu, IShellExtInit),
-            QITABENT(ContextMenu, IContextMenu),
-            { 0 },
-    };
-
+        QITABENT(ContextMenu, IContextMenu),
+        { 0 },
+// Geez. Can't build cleanly w/ it's own stuff APIs
+#pragma warning( push )
+#pragma warning( disable: 4365 )
+#pragma warning( disable: 4838 )
+    }
+#pragma warning( pop )
+    ;
     return QISearch(this, rgqit, iid, ppv);
 }
 
@@ -60,12 +122,12 @@ STDMETHODIMP ContextMenu::Initialize(
         HKEY              prog_id
         ) {
 
-    HRESULT hr = SHCreateItemFromIDList(folder_pidl, IID_PPV_ARGS(&folder_));
+    HRESULT hr = SHCreateItemFromIDList(folder_pidl, IID_PPV_ARGS(&dest_));
     if (FAILED(hr)) {
         return hr;
     }
-    obj_ = data_object;
-    obj_->AddRef();
+    items_ = data_object;
+    items_->AddRef();
     return S_OK;
 }
 
@@ -82,26 +144,34 @@ STDMETHODIMP ContextMenu::GetCommandString(
 STDMETHODIMP ContextMenu::InvokeCommand(
         LPCMINVOKECOMMANDINFO info
         ) {
-    ComPtr<IFileOperationQueue> op;
-    HRESULT hr = CoCreateInstance(CLSID_FileOperationQueue, NULL,
-            CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&op));
+    std::unique_ptr<InvokeCommandParams> params(new InvokeCommandParams);
+    params->cmd = static_cast<Command>(LOWORD(info->lpVerb));
+
+    HRESULT hr = S_OK;
+
+    hr = CoMarshalInterThreadInterfaceInStream(IID_IDataObject, items_,
+            &params->items);
     if (FAILED(hr)) {
-        Alart(hr, L"Cannot instantiate file operation queue");
+        Alart(hr, L"Marshal items");
         return hr;
     }
 
-    switch (LOWORD(info->lpVerb)) {
-        case QueueMoveCmd:
-            hr = op->MoveItems(obj_, folder_);
-            break;
-        case QueueCopyCmd:
-            hr = op->CopyItems(obj_, folder_);
-            break;
-        default:
-            return HRESULT_FROM_WIN32(ERROR_NOT_FOUND);
-    }
+    hr = CoMarshalInterThreadInterfaceInStream(IID_IShellItem, dest_,
+            &params->dest);
     if (FAILED(hr)) {
-        Alart(hr, L"ENQUEUE");
+        Alart(hr, L"Marshal dest");
+        return hr;
+    }
+
+    if (SHCreateThread(
+            ThreadProc,
+            params.get(),
+            CTF_PROCESS_REF,
+            NULL)) {
+        params.release();
+    } else {
+        hr = HRESULT_FROM_WIN32(GetLastError());
+        Alart(hr, L"Create InvokeCommand thread");
         return hr;
     }
 

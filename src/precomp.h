@@ -44,10 +44,20 @@ void ReleaseGlobalRef();
 ULONG GetGlobalRef();
 
 EXTERN_C CLSID CLSID_ContextMenu;
-EXTERN_C CLSID CLSID_FileOperationQueue;
+EXTERN_C CLSID CLSID_OperationQueue;
+EXTERN_C CLSID CLSID_OurProxyFactory;
 
 inline void Alart(HRESULT hr, LPCWSTR title) {
     WCHAR err[256];
     swprintf_s(err, ARRAYSIZE(err), L"0x%08x", hr);
     ::MessageBoxW(NULL, err, title, MB_OK);
+}
+
+inline void Debug(LPCWSTR fmt, ...) {
+    WCHAR msg[256];
+    va_list ap;
+    va_start(ap, fmt);
+    vswprintf_s(msg, fmt, ap);
+    va_end(ap);
+    ::MessageBoxW(NULL, msg, L"Debug", MB_OK);
 }
